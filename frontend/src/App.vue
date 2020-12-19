@@ -17,6 +17,7 @@
             allowfullscreen
           ></iframe>
         </td>
+        <td><a :href="m.youtubeUrl" target="_blank">Youtube Suche</a></td>
       </tr>
     </table>
   </div>
@@ -36,6 +37,7 @@ export default {
 
     const sendurl = async () => {
       console.log(url.value);
+      movies.value = []
       let res = await axios.post("api/sendurl", { url: url.value });
       console.log(res.data);
       movies.value = res.data;

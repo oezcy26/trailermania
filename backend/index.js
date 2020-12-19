@@ -30,13 +30,13 @@ app.post('/api/sendurl', async (req, res) => {
         let results = [];
         let items = document.querySelectorAll('article');
         items.forEach((item) => {
-            let name = item.querySelector('cite a')
-            let bild = item.querySelector('img.cover-opacity')
+            let name = item.querySelector('a')
+            //let bild = item.querySelector('img.cover-opacity')
 
             let newElem = {
                 title: name.getAttribute('title'),
                 url: name.getAttribute('href'),
-                imgSrc: "https://www.filmpalast.to" + bild.getAttribute('src')
+                //imgSrc: "https://www.filmpalast.to" + bild.getAttribute('src')
             }
             results.push(newElem);
         });
@@ -46,7 +46,6 @@ app.post('/api/sendurl', async (req, res) => {
     console.log(movies[0]);
 
     // make Youtube-Search Url's
-    var youtubeUrlArray = [];
     movies.forEach((movie) => {
         let nameArray = movie.title.split(" ");
         let youtubeUrl = "https://www.youtube.com/results?search_query=trailer+german"
@@ -56,13 +55,12 @@ app.post('/api/sendurl', async (req, res) => {
         })
 
         movie.youtubeUrl = youtubeUrl
-        //console.log(youtubeUrl);
-        youtubeUrlArray.push(youtubeUrl);
+
     })
 
-    var embedUrlArray = []
+    // get end of youtube vido url for i-frame
     for (var i = 0; i < movies.length; i++) {
-        await page.goto(youtubeUrlArray[i])
+        await page.goto(movies[i].youtubeUrl)
         let href = await page.evaluate(() => {
             // let results = []
             let title = document.querySelector('#video-title')
@@ -73,7 +71,7 @@ app.post('/api/sendurl', async (req, res) => {
         })
         movies[i].iframeUrl = href
     }
-    console.log(embedUrlArray)
+    //console.log(embedUrlArray)
 
 
 
