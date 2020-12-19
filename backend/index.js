@@ -1,10 +1,29 @@
+const express = require('express')
+const path = require('path');
+
+const app = express()
+
+//process.env.NODE_ENV is null in production -> set it to 3000 in development
+//in dev: server must startet npm run dev -> "dev"-Skript in package.json
+const PORT = 3000
+
+app.use(express.json())
 const puppeteer = require('puppeteer');
 
-(async () => {
+
+
+
+/* ************* 
+*******API *****
+****************/
+
+app.post('/api/sendurl', async (req, res) => {
+    let data = req.body;
+    console.log(data);
+
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
-    await page.goto('https://filmpalast.to/search/genre/Abenteuer');
-    await page.screenshot({ path: 'example.png' });
+    await page.goto(data.url);
 
     let movies = await page.evaluate(() => {
         let results = [];
@@ -23,4 +42,17 @@ const puppeteer = require('puppeteer');
     
 
     await browser.close();
-})();
+    res.json(movies)
+	
+})
+
+// TODO
+app.use('/', express.static(path.join(__dirname, 'vue')))
+
+
+
+/* ************* 
+***** STARTER *****
+****************/
+
+app.listen(PORT, () => console.log("Listening on port " + PORT)) 
