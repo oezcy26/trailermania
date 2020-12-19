@@ -25,25 +25,81 @@ app.post('/api/sendurl', async (req, res) => {
     const page = await browser.newPage();
     await page.goto(data.url);
 
+    // get Movies from a page
     let movies = await page.evaluate(() => {
         let results = [];
-        let items = document.querySelectorAll('article cite a');
+        let items = document.querySelectorAll('article');
         items.forEach((item) => {
-            results.push({
-                url:  item.getAttribute('href'),
-                text: item.getAttribute('title'),
-            });
+            let name = item.querySelector('cite a')
+            let bild = item.querySelector('img.cover-opacity')
+
+            let newElem = {
+                title: name.getAttribute('title'),
+                url: name.getAttribute('href'),
+                imgSrc: "https://www.filmpalast.to" + bild.getAttribute('src')
+            }
+            results.push(newElem);
         });
         return results;
-    })   
+    })
 
     console.log(movies[0]);
 
-    
+    // make Youtube-Search Url's
+    var youtubeUrlArray = [];
+    movies.forEach((movie) => {
+        let nameArray = movie.title.split(" ");
+        let youtubeUrl = "https://www.youtube.com/results?search_query=trailer+german"
+        nameArray.forEach(part => {
+            youtubeUrl = youtubeUrl + "+" + part
+            //console.log(youtubeUrl);
+        })
+
+        movie.youtubeUrl = youtubeUrl
+        //console.log(youtubeUrl);
+        youtubeUrlArray.push(youtubeUrl);
+    })
+
+    var embedUrlArray = []
+    for (var i = 0; i < movies.length; i++) {
+        await page.goto(youtubeUrlArray[i])
+        let href = await page.evaluate(() => {
+            // let results = []
+            let title = document.querySelector('#video-title')
+            let href = title.getAttribute('href')
+            let url = href.split("=")[1]
+            //let embedUrl = href.split("=")[1]
+            return url
+        })
+        movies[i].iframeUrl = href
+    }
+    console.log(embedUrlArray)
+
+
+
+    /*  var embedUrl
+   try {
+       await page.goto(youtubeUrl)   
+       embedUrl = await page.evaluate(()=>{
+          // let results = []
+           let title = document.querySelector('#video-title')
+           let href = title.getAttribute('href')
+           //let embedUrl = href.split("=")[1]
+           return href
+       })  
+       console.log(embedUrl);       
+       movie.youtubeUrl = embedUrl;
+   } catch (error) {
+
+       console.log(error)
+   } */
+    //console.log(embedUrl);
+
+
 
     await browser.close();
     res.json(movies)
-	
+
 })
 
 // TODO
