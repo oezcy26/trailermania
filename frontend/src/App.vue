@@ -6,18 +6,23 @@
 
     <table>
       <tr v-for="m in movies" :key="m">
-        <td>{{m.title}} </td>
+        <td>{{ m.title }}</td>
         <td>
           <iframe
             width="322"
             height="181"
-            :src="'https://www.youtube.com/embed/'+m.iframeUrl"
+            :src="'https://www.youtube.com/embed/' + m.iframeUrl"
             frameborder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowfullscreen
           ></iframe>
         </td>
         <td><a :href="m.youtubeUrl" target="_blank">Youtube Suche</a></td>
+        <td>
+          <a :href="'https:' + m.url" target="_blank">Filmpalast-Seite</a>
+        </td>
+        <td><button @click="getVivo(m)">get Vivo</button></td>
+        
       </tr>
     </table>
   </div>
@@ -34,16 +39,29 @@ export default {
   setup() {
     const url = ref("https://filmpalast.to/search/genre/Abenteuer");
     const movies = ref([]);
+    movies.value.push({
+      iframeUrl: "P2YbykbdJ1E",
+      title: "TEST!!!!!Orc Wars",
+      url: "//filmpalast.to/stream/orc-wars",
+      youtubeUrl:
+        "https://www.youtube.com/results?search_query=trailer+german+Orc+Wars",
+    });
 
     const sendurl = async () => {
       console.log(url.value);
-      movies.value = []
+      movies.value = [];
       let res = await axios.post("api/sendurl", { url: url.value });
       console.log(res.data);
       movies.value = res.data;
     };
 
-    return { sendurl, url, movies };
+    const getVivo = async (movie) => {
+      let resp = await axios.post("api/getvivo", { detailurl: movie.url });
+      console.log(resp.data);
+      movie.vivoEmbed = resp.data.vivoEmbed;
+    };
+
+    return { sendurl, url, movies, getVivo };
   },
 };
 </script>

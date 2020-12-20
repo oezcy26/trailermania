@@ -71,32 +71,50 @@ app.post('/api/sendurl', async (req, res) => {
         })
         movies[i].iframeUrl = href
     }
-    //console.log(embedUrlArray)
 
 
 
-    /*  var embedUrl
-   try {
-       await page.goto(youtubeUrl)   
-       embedUrl = await page.evaluate(()=>{
-          // let results = []
-           let title = document.querySelector('#video-title')
-           let href = title.getAttribute('href')
-           //let embedUrl = href.split("=")[1]
-           return href
-       })  
-       console.log(embedUrl);       
-       movie.youtubeUrl = embedUrl;
-   } catch (error) {
-
-       console.log(error)
-   } */
-    //console.log(embedUrl);
 
 
 
     await browser.close();
     res.json(movies)
+
+})
+
+app.post('/api/getvivo', async (req, res) => {
+    let url = req.body.detailurl
+
+    //make whole url
+    url = "https:" + url;
+    console.log(url);
+
+    //open browser with url
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.goto(url);
+
+    //get vivo-embed-url
+    let vivoEmbed = await page.evaluate(() => {
+        let result;
+        let items = document.querySelectorAll('ul.currentStreamLinks');
+
+        //return items[1].querySelector('p.hostName').innerHTML
+        let vivo;
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].querySelector('p.hostName').innerHTML == "vivo.sx") {
+                vivo = items[i].querySelector('a').getAttribute('data-player-url')
+            }
+        }
+        return vivo;
+    })
+
+
+
+    return res.json({
+        vivoEmbed: vivoEmbed
+    })
+
 
 })
 
