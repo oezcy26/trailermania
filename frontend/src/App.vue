@@ -1,66 +1,20 @@
 <template>
-  <div>
-    <label>url:</label>
-    <input type="text" size="70" v-model="url" />
-    <button @click="sendurl">ok</button>
+  <div id="app">
+    <b-navbar type="dark" variant="dark">
+      <b-navbar-brand href="#">Trailermania</b-navbar-brand>
+      <b-navbar-nav>
 
-    <table>
-      <tr v-for="m in movies" :key="m">
-        <td>{{ m.title }}</td>
-        <td>
-          <iframe
-            width="560"
-            height="315"
-            :src="'https://www.youtube.com/embed/' + m.iframeUrl"
-            frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowfullscreen
-          ></iframe>
-        </td>
-        <td><a :href="m.youtubeUrl" target="_blank">Youtube Suche</a></td>
-        <td>
-          <a :href="'https:' + m.url" target="_blank">Filmpalast-Seite</a>
-        </td>
-        
-        
-      </tr>
-    </table>
+        <!-- Anbiter -->
+        <b-nav-item-dropdown text="Anbieter" right>
+          <b-dropdown-item href="#/">Filmpalast.to</b-dropdown-item>
+          <b-dropdown-item href="#/bs">bs.to</b-dropdown-item>
+        </b-nav-item-dropdown>
+      </b-navbar-nav>
+    </b-navbar>
+
+    <router-view />
   </div>
 </template>
-
-
-
-<script>
-import axios from "axios";
-import { ref } from "vue";
-
-export default {
-  name: "App",
-  setup() {
-    const url = ref("https://filmpalast.to/search/genre/Abenteuer");
-    const movies = ref([]);
-    movies.value.push({
-      iframeUrl: "P2YbykbdJ1E",
-      title: "TEST!!!!!Orc Wars",
-      url: "//filmpalast.to/stream/orc-wars",
-      youtubeUrl:
-        "https://www.youtube.com/results?search_query=trailer+german+Orc+Wars",
-    });
-
-    const sendurl = async () => {
-      console.log(url.value);
-      movies.value = [];
-      let res = await axios.post("api/sendurl", { url: url.value });
-      console.log(res.data);
-      movies.value = res.data;
-    };
-
-
-
-    return { sendurl, url, movies };
-  },
-};
-</script>
 
 <style>
 #app {
@@ -69,6 +23,18 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+}
+
+#nav {
+  padding: 30px;
+}
+
+#nav a {
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+#nav a.router-link-exact-active {
+  color: #42b983;
 }
 </style>
