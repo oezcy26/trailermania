@@ -9,8 +9,8 @@
         <td>{{ m.title }}</td>
         <td>
           <iframe
-            width="322"
-            height="181"
+            width="560"
+            height="315"
             :src="'https://www.youtube.com/embed/' + m.iframeUrl"
             frameborder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -21,7 +21,7 @@
         <td>
           <a :href="'https:' + m.url" target="_blank">Filmpalast-Seite</a>
         </td>
-        <td><button @click="getVivo(m)">get Vivo</button></td>
+        
         
       </tr>
     </table>
@@ -55,13 +55,9 @@ export default {
       movies.value = res.data;
     };
 
-    const getVivo = async (movie) => {
-      let resp = await axios.post("api/getvivo", { detailurl: movie.url });
-      console.log(resp.data);
-      movie.vivoEmbed = resp.data.vivoEmbed;
-    };
 
-    return { sendurl, url, movies, getVivo };
+
+    return { sendurl, url, movies };
   },
 };
 </script>
