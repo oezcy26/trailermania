@@ -41,7 +41,5 @@
   color: #42b983;
 }
 
-#content{
-  margin-top:20px;
-}
+
 </style>
