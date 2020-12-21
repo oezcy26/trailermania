@@ -12,7 +12,7 @@
       </b-navbar-nav>
     </b-navbar>
 
-    <router-view id="content"/>
+    <router-view id="content"  style="padding: 0px 20px;"/>
   </div>
 </template>
 

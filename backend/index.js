@@ -17,6 +17,27 @@ const puppeteer = require('puppeteer');
 *******API *****
 ****************/
 
+app.get('/api/genres', async (req, res)=>{
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.goto("https://filmpalast.to/");
+
+    // get genres from site
+    let genres = await page.evaluate(()=>{
+        let liContent = []
+        let lis = document.querySelectorAll('section#genre ul li a')
+
+        lis.forEach((li)=>{
+            liContent.push(li.innerHTML)
+        })
+        return liContent;
+    })
+
+    res.json({
+        genres : genres
+    })
+})
+
 app.post('/api/sendurl', async (req, res) => {
     let data = req.body;
     console.log(data);

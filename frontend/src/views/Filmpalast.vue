@@ -1,8 +1,14 @@
 <template>
   <div>
     <b-row style="padding: 20px 0px;">
-      <b-col></b-col>
-      <b-col cols="8">
+      <b-col>
+        <b-overlay :show="genres.length == 0">
+          <b-input-group prepend="Genre:">
+            <b-form-select v-model="selectedGenre" :options="genres"></b-form-select>
+          </b-input-group>
+        </b-overlay>
+      </b-col>
+      <b-col cols="6">
         <b-input-group prepend="Url:">
           <b-form-input size="70" v-model="url" placeholder="Url"></b-form-input>
           <b-input-group-append>
@@ -13,14 +19,14 @@
       <b-col></b-col>
     </b-row>
     <b-overlay :show="loading">
-      <b-row v-for="m in movies" :key="m" align-v="center" style="padding: 0px 20px;">
-        <b-col cols="2">
+      <b-row v-for="(m,idx) in movies" :key="idx" align-v="center" style="padding: 0px 20px;">
+        <b-col>
           <h2>{{ m.title }}</h2>
         </b-col>
-        <b-col>
+        <b-col md="auto">
           <iframe
-            width="560"
-            height="315"
+            width="420"
+            height="236"
             :src="'https://www.youtube.com/embed/' + m.iframeUrl"
             frameborder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -39,11 +45,25 @@
 </template>
 <script>
 import axios from "axios";
-import { ref } from "@vue/composition-api";
+import { onMounted, ref } from "@vue/composition-api";
 
 export default {
   name: "Filmpalast",
   setup() {
+    const genres = ref([]);
+    const selectedGenre = ref();
+    // get genres from site
+    onMounted(async () => {
+      let res = await axios.get("/api/genres");
+      //make options with 'key - value'
+      res.data.genres.forEach((element) => {
+        genres.value.push({
+          value: element,
+          text: element,
+        });
+      });
+    });
+
     const loading = ref(false);
 
     const url = ref("https://filmpalast.to/search/genre/Abenteuer");
@@ -65,7 +85,7 @@ export default {
       movies.value = res.data;
       loading.value = false;
     };
-    return { sendurl, url, movies, loading };
+    return { genres, selectedGenre, sendurl, url, movies, loading };
   },
 };
 </script>
