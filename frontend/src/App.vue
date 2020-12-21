@@ -41,5 +41,10 @@
   color: #42b983;
 }
 
+.divider-bottom {
+  border-bottom: black 3px solid;
+  border-bottom-color: #343a4045 ;
+}
+
 
 </style>

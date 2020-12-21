@@ -10,41 +10,77 @@ const PORT = 3000
 app.use(express.json())
 const puppeteer = require('puppeteer');
 
+/* ***********
+***** COMMON HELPERS *********
+******************/
 
+getBrowserPage = async (url) => {
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.goto(url);
+    return page;
+}
 
 
 /* ************* 
 *******API *****
 ****************/
 
-app.get('/api/genres', async (req, res)=>{
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
-    await page.goto("https://filmpalast.to/");
+app.get('/api/genres', async (req, res) => {
+    page = await getBrowserPage("https://filmpalast.to/")
 
     // get genres from site
-    let genres = await page.evaluate(()=>{
+    let genres = await page.evaluate(() => {
         let liContent = []
         let lis = document.querySelectorAll('section#genre ul li a')
 
-        lis.forEach((li)=>{
+        lis.forEach((li) => {
             liContent.push(li.innerHTML)
         })
         return liContent;
     })
 
     res.json({
-        genres : genres
+        genres: genres
     })
+})
+
+app.get('/api/fetchmovies/:genre', async (req, res) => {
+    let genre = req.params.genre;
+    console.log(genre);
+
+    page = await getBrowserPage("https://filmpalast.to/")
+
+    movies = await page.evaluate(() => {
+        let movies = []
+        let aTags = document.querySelectorAll('ul#sliderDla li a:not(.button)')
+        aTags.forEach(element => {
+
+            let newElem = {
+                title: element.getAttribute('title'),
+                url: element.getAttribute('href'),
+                //imgSrc: "https://www.filmpalast.to" + bild.getAttribute('src')
+            }
+            movies.push(newElem)
+        });
+
+
+
+
+        return movies;
+
+    })
+
+    console.log(movies);
+
+    res.json(movies)
 })
 
 app.post('/api/sendurl', async (req, res) => {
     let data = req.body;
     console.log(data);
 
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
-    await page.goto(data.url);
+    page = await getBrowserPage(data.url);
 
     // get Movies from a page
     let movies = await page.evaluate(() => {
@@ -111,9 +147,7 @@ app.post('/api/getvivo', async (req, res) => {
     console.log(url);
 
     //open browser with url
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
-    await page.goto(url);
+    page = await getBrowserPage(url)
 
     //get vivo-embed-url
     let vivoEmbed = await page.evaluate(() => {
