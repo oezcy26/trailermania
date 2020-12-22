@@ -40,6 +40,27 @@ getMovieBasicsForStart = async ()=>{
     return movies
 }
 
+getMovieBasicForRest = async () => {
+    let movies = await page.evaluate(() => {
+        let results = [];
+        let items = document.querySelectorAll('article');
+        items.forEach((item) => {
+            let name = item.querySelector('a')
+            //let bild = item.querySelector('img.cover-opacity')
+
+            let newElem = {
+                title: name.getAttribute('title'),
+                url: name.getAttribute('href'),
+                //imgSrc: "https://www.filmpalast.to" + bild.getAttribute('src')
+            }
+            results.push(newElem);
+        });
+        return results;
+    })
+    return movies;
+
+}
+
 // make a Youtube-Search-Url for each movie
 makeYoutubeUrl = (movies) => {
     movies.forEach((movie) => {
@@ -63,7 +84,13 @@ makeIframeUrl = async (movies) => {
             // let results = []
             let title = document.querySelector('#video-title')
             let href = title.getAttribute('href')
-            let url = href.split("=")[1]
+            let url = null;
+            if(href){
+                url = href.split("=")[1]
+
+            }else{
+                url = "No-href-found"
+            }
             //let embedUrl = href.split("=")[1]
             return url
         })
@@ -100,9 +127,19 @@ app.get('/api/fetchmovies/:genre', async (req, res) => {
     console.log(genre);
 
     page = await getBrowserPage("https://filmpalast.to/")
-    
-    movies = await getMovieBasicsForStart()
+
+    if(genre === 'Startseite'){
+        movies = await getMovieBasicsForStart()
+    }else{
+        movies = await getMovieBasicForRest()
+    }
+    console.log("1 \n" + movies);
+
     makeYoutubeUrl(movies)
+
+    console.log(" \n" + movies);
+
+
     await makeIframeUrl(movies)
 
     console.log(movies);
