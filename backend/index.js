@@ -21,6 +21,56 @@ getBrowserPage = async (url) => {
     return page;
 }
 
+getMovieBasicsForStart = async ()=>{
+
+    movies = await page.evaluate((selectorForAtags) => {
+        let movies = []
+        let aTags = document.querySelectorAll('ul#sliderDla li a:not(.button)')
+        aTags.forEach(element => {
+            let newElem = {
+                title: element.getAttribute('title'),
+                url: element.getAttribute('href'),
+                //imgSrc: "https://www.filmpalast.to" + bild.getAttribute('src')
+            }
+            movies.push(newElem)
+        });
+        return movies;
+
+    })
+    return movies
+}
+
+// make a Youtube-Search-Url for each movie
+makeYoutubeUrl = (movies) => {
+    movies.forEach((movie) => {
+        let nameArray = movie.title.split(" ");
+        let youtubeUrl = "https://www.youtube.com/results?search_query=trailer+german"
+        nameArray.forEach(part => {
+            youtubeUrl = youtubeUrl + "+" + part
+            //console.log(youtubeUrl);
+        })
+
+        movie.youtubeUrl = youtubeUrl
+
+    })
+}
+
+//takes url from first youtube video found for Iframe
+makeIframeUrl = async (movies) => {
+    for (var i = 0; i < movies.length; i++) {
+        await page.goto(movies[i].youtubeUrl)
+        let href = await page.evaluate(() => {
+            // let results = []
+            let title = document.querySelector('#video-title')
+            let href = title.getAttribute('href')
+            let url = href.split("=")[1]
+            //let embedUrl = href.split("=")[1]
+            return url
+        })
+        movies[i].iframeUrl = href
+    }
+}
+
 
 /* ************* 
 *******API *****
@@ -50,26 +100,10 @@ app.get('/api/fetchmovies/:genre', async (req, res) => {
     console.log(genre);
 
     page = await getBrowserPage("https://filmpalast.to/")
-
-    movies = await page.evaluate(() => {
-        let movies = []
-        let aTags = document.querySelectorAll('ul#sliderDla li a:not(.button)')
-        aTags.forEach(element => {
-
-            let newElem = {
-                title: element.getAttribute('title'),
-                url: element.getAttribute('href'),
-                //imgSrc: "https://www.filmpalast.to" + bild.getAttribute('src')
-            }
-            movies.push(newElem)
-        });
-
-
-
-
-        return movies;
-
-    })
+    
+    movies = await getMovieBasicsForStart()
+    makeYoutubeUrl(movies)
+    await makeIframeUrl(movies)
 
     console.log(movies);
 
